@@ -48,7 +48,7 @@ import java.util.List;
 
 public class RBGTDatabase extends SQLiteOpenHelper {
 
-    public static final String DATABASE_NAME = "RB_HYHO_DB";
+    public static final String DATABASE_NAME = "RB_HYHO_DB1";
     public static final int DATABASE_VERSION = 1;
     private SQLiteDatabase db;
     Context context;
@@ -362,6 +362,35 @@ public class RBGTDatabase extends SQLiteOpenHelper {
         Log.d("Fetching check->Stop<", "-");
         return list;
     }
+
+    public ArrayList<BrandMaster> getBrandFromCategory(Integer categoryCd) {
+        Log.d("Fetchecklidata->Start<-", "-");
+        ArrayList<BrandMaster> list = new ArrayList<>();
+        Cursor dbcursor = null;
+        try {
+            dbcursor = db.rawQuery("Select * from Brand_Master where Category_Id = '" + categoryCd + "'", null);
+
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                while (!dbcursor.isAfterLast()) {
+                    BrandMaster ch = new BrandMaster();
+                    ch.setBrandId(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("Brand_Id")));
+                    ch.setBrand(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Brand")));
+                    //ch.setAnswer("");
+                    list.add(ch);
+                    dbcursor.moveToNext();
+                }
+                dbcursor.close();
+                return list;
+            }
+        } catch (Exception e) {
+            Log.d("Exc get windows list!", e.toString());
+            return list;
+        }
+        Log.d("Fetching check->Stop<", "-");
+        return list;
+    }
+
 
 
     public ArrayList<CategoryMaster> getCategoryDBSRData(JourneyPlan jcp) {
@@ -934,6 +963,10 @@ public class RBGTDatabase extends SQLiteOpenHelper {
                 values.put("Geo_Tag", jcpList.get(i).getGeoTag());
                 values.put("Distributor_Id", jcpList.get(i).getDistributorId());
                 values.put("Classification_Id", jcpList.get(i).getClassificationId());
+                values.put("Latitude", jcpList.get(i).getLatitude());
+                values.put("Longitude", jcpList.get(i).getLongitude());
+                values.put("GeoFencing", jcpList.get(i).getGeoFencing());
+
                 long id = db.insert("Journey_Plan", null, values);
                 if (id == -1) {
                     throw new Exception();
@@ -1047,6 +1080,7 @@ public class RBGTDatabase extends SQLiteOpenHelper {
                 values.put("Brand_Sequence", data.get(i).getBrandSequence());
                 values.put("Sub_Category_Id", data.get(i).getSubcategoryId());
                 values.put("Company_Id", data.get(i).getCompany_Id());
+                values.put("Category_Id", data.get(i).getCategoryId());
 
                 long id = db.insert("Brand_Master", null, values);
                 if (id == -1) {
@@ -1842,6 +1876,10 @@ public class RBGTDatabase extends SQLiteOpenHelper {
                     sb.setDistributorId(Integer.parseInt(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Distributor_Id"))));
                     sb.setDistributorN(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Distributor")));
                     sb.setClassificationId(Integer.parseInt(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Classification_Id"))));
+                    sb.setLongitude(Double.valueOf(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Longitude"))));
+                    sb.setLatitude(Double.valueOf(dbcursor.getString(dbcursor.getColumnIndexOrThrow("Latitude"))));
+                    sb.setGeoFencing(Integer.valueOf(dbcursor.getString(dbcursor.getColumnIndexOrThrow("GeoFencing"))));
+
                     if (sb.getStoreTypeId() == 1) {
                         sb.setColourCode(R.color.peachpuff);
                     } else if (sb.getStoreTypeId() == 2) {
